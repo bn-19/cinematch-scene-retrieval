@@ -70,6 +70,8 @@ uvicorn backend.main:app --reload --port 8000
 
 Open [http://localhost:8000](http://localhost:8000) in your browser.
 
+Last deploy workflow smoke test: 2026-04-20.
+
 ## Free Hosted Demo
 
 For a free public link, deploy this project as a Docker Space on Hugging Face Spaces.
