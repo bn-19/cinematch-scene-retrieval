@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CineMatch — Scene Retrieval</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="/static/style.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>CineMatch</h1>
+            <p class="subtitle">Describe a scene. Find your reference.</p>
+        </header>
+
+        <div class="search-wrap">
+            <div class="search-bar">
+                <input
+                    type="text"
+                    id="query-input"
+                    placeholder="e.g. a quiet dinner where something is being left unsaid"
+                    autocomplete="off"
+                >
+                <button id="search-btn">Search</button>
+            </div>
+        </div>
+
+        <div id="status" class="status"></div>
+        <div id="results" class="results-grid"></div>
+    </div>
+
+    <script src="/static/app.js"></script>
+</body>
+</html>
