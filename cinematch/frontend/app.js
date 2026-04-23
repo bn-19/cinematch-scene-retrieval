@@ -3,6 +3,9 @@ const searchBtn = document.getElementById("search-btn");
 const resultsDiv = document.getElementById("results");
 const statusDiv = document.getElementById("status");
 
+let lastSearchQuery = "";
+let searchSequence = 0;
+
 // ── Lightbox ─────────────────────────────────────────────
 const lightbox = document.createElement("div");
 lightbox.id = "lightbox";
@@ -52,7 +55,97 @@ function closeLightbox() {
 lightbox.querySelector(".lb-close").addEventListener("click", closeLightbox);
 lightbox.querySelector(".lb-backdrop").addEventListener("click", closeLightbox);
 document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") closeLightbox();
+    if (e.key === "Escape") {
+        closeLightbox();
+        closeFeedbackModal();
+    }
+});
+
+// ── Search feedback ─────────────────────────────────────
+const feedbackModal = document.createElement("div");
+feedbackModal.id = "feedback-modal";
+feedbackModal.setAttribute("aria-hidden", "true");
+feedbackModal.innerHTML = `
+  <div class="feedback-backdrop"></div>
+  <div class="feedback-content" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
+    <button class="feedback-close" aria-label="Close feedback">✕</button>
+    <div class="feedback-kicker">Quick rating</div>
+    <div id="feedback-title" class="feedback-title">Are you satisfied with these results?</div>
+    <div class="feedback-scale" aria-label="Rate results from 1 to 5 stars">
+      <button type="button" class="star-btn" data-rating="1" aria-label="1 star, not satisfied">★</button>
+      <button type="button" class="star-btn" data-rating="2" aria-label="2 stars">★</button>
+      <button type="button" class="star-btn" data-rating="3" aria-label="3 stars">★</button>
+      <button type="button" class="star-btn" data-rating="4" aria-label="4 stars">★</button>
+      <button type="button" class="star-btn" data-rating="5" aria-label="5 stars, very satisfied">★</button>
+    </div>
+    <div class="feedback-labels">
+      <span>Not satisfied</span>
+      <span>Very satisfied</span>
+    </div>
+    <div class="feedback-thanks" aria-live="polite"></div>
+  </div>
+`;
+document.body.appendChild(feedbackModal);
+
+const feedbackStars = feedbackModal.querySelectorAll(".star-btn");
+const feedbackThanks = feedbackModal.querySelector(".feedback-thanks");
+
+function setFeedbackRating(rating) {
+    feedbackStars.forEach(function (star) {
+        const starRating = Number(star.dataset.rating);
+        star.classList.toggle("selected", starRating <= rating);
+    });
+}
+
+function saveFeedback(rating) {
+    const feedback = {
+        query: lastSearchQuery,
+        rating: rating,
+        created_at: new Date().toISOString(),
+    };
+    let savedFeedback = [];
+    try {
+        savedFeedback = JSON.parse(localStorage.getItem("cinematch_feedback") || "[]");
+    } catch (err) {
+        savedFeedback = [];
+    }
+    savedFeedback.push(feedback);
+    localStorage.setItem("cinematch_feedback", JSON.stringify(savedFeedback.slice(-25)));
+}
+
+function openFeedbackModal() {
+    feedbackThanks.textContent = "";
+    setFeedbackRating(0);
+    feedbackModal.classList.add("open");
+    feedbackModal.setAttribute("aria-hidden", "false");
+}
+
+function closeFeedbackModal() {
+    feedbackModal.classList.remove("open");
+    feedbackModal.setAttribute("aria-hidden", "true");
+}
+
+feedbackModal.querySelector(".feedback-close").addEventListener("click", closeFeedbackModal);
+feedbackModal.querySelector(".feedback-backdrop").addEventListener("click", closeFeedbackModal);
+
+feedbackStars.forEach(function (star) {
+    star.addEventListener("mouseenter", function () {
+        setFeedbackRating(Number(star.dataset.rating));
+    });
+    star.addEventListener("focus", function () {
+        setFeedbackRating(Number(star.dataset.rating));
+    });
+    star.addEventListener("click", function () {
+        const rating = Number(star.dataset.rating);
+        setFeedbackRating(rating);
+        saveFeedback(rating);
+        feedbackThanks.textContent = "Thanks. Your rating helps tune the scene matching experience.";
+        window.setTimeout(closeFeedbackModal, 900);
+    });
+});
+
+feedbackModal.querySelector(".feedback-scale").addEventListener("mouseleave", function () {
+    if (!feedbackThanks.textContent) setFeedbackRating(0);
 });
 
 // ── Card ─────────────────────────────────────────────────
@@ -135,8 +228,11 @@ function createSceneCard(scene) {
 async function search() {
     const query = queryInput.value.trim();
     if (!query) return;
+    const currentSearch = searchSequence + 1;
+    searchSequence = currentSearch;
 
     searchBtn.disabled = true;
+    closeFeedbackModal();
     statusDiv.textContent = "Searching...";
     resultsDiv.textContent = "";
 
@@ -155,10 +251,14 @@ async function search() {
         }
 
         statusDiv.textContent = "Top " + data.results.length + " matches for \"" + data.query + "\"";
+        lastSearchQuery = data.query;
 
         data.results.forEach(function (scene) {
             resultsDiv.appendChild(createSceneCard(scene));
         });
+        window.setTimeout(function () {
+            if (searchSequence === currentSearch) openFeedbackModal();
+        }, 450);
     } catch (err) {
         statusDiv.textContent = "Error: " + err.message;
     } finally {

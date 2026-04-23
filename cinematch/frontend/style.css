@@ -380,6 +380,147 @@ header h1 {
     margin-top: 4px;
 }
 
+/* ── Feedback modal ───────────────────────────────────── */
+#feedback-modal {
+    display: none;
+    position: fixed;
+    inset: 0;
+    z-index: 900;
+    align-items: center;
+    justify-content: center;
+    padding: 24px;
+}
+
+#feedback-modal.open {
+    display: flex;
+}
+
+.feedback-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,0.72);
+    backdrop-filter: blur(5px);
+}
+
+.feedback-content {
+    position: relative;
+    z-index: 1;
+    width: min(420px, 100%);
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 26px 28px 24px;
+    box-shadow: 0 24px 70px rgba(0,0,0,0.65);
+    text-align: center;
+}
+
+.feedback-close {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    width: 28px;
+    height: 28px;
+    border: none;
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-muted);
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: background 0.2s, color 0.2s;
+}
+
+.feedback-close:hover,
+.feedback-close:focus-visible {
+    background: rgba(255,255,255,0.12);
+    color: var(--text);
+    outline: none;
+}
+
+.feedback-kicker {
+    margin-bottom: 8px;
+    font-size: 0.68rem;
+    font-weight: 500;
+    color: var(--score);
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+}
+
+.feedback-title {
+    font-family: "DM Serif Display", Georgia, serif;
+    font-size: 1.45rem;
+    line-height: 1.2;
+    color: var(--text);
+}
+
+.feedback-scale {
+    display: flex;
+    justify-content: center;
+    gap: 8px;
+    margin-top: 22px;
+}
+
+.star-btn {
+    width: 42px;
+    height: 42px;
+    border: 1px solid var(--border);
+    border-radius: 50%;
+    background: var(--surface-2);
+    color: var(--text-dim);
+    font-size: 1.25rem;
+    line-height: 1;
+    cursor: pointer;
+    transition: border-color 0.2s, color 0.2s, transform 0.2s, background 0.2s;
+}
+
+.star-btn:hover,
+.star-btn:focus-visible,
+.star-btn.selected {
+    border-color: var(--score);
+    color: var(--score);
+    background: rgba(200,169,126,0.08);
+    outline: none;
+}
+
+.star-btn:hover,
+.star-btn:focus-visible {
+    transform: translateY(-2px);
+}
+
+.feedback-labels {
+    display: flex;
+    justify-content: space-between;
+    gap: 16px;
+    margin-top: 10px;
+    font-size: 0.68rem;
+    font-weight: 400;
+    color: var(--text-muted);
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.feedback-thanks {
+    min-height: 1.4em;
+    margin-top: 16px;
+    font-size: 0.78rem;
+    font-weight: 300;
+    color: var(--text-muted);
+    line-height: 1.4;
+}
+
+@media (max-width: 440px) {
+    .feedback-content {
+        padding: 24px 20px 22px;
+    }
+
+    .star-btn {
+        width: 38px;
+        height: 38px;
+        font-size: 1.15rem;
+    }
+}
+
 /* ── No results ────────────────────────────────────────── */
 .no-results {
     grid-column: 1 / -1;
