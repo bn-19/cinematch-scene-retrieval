@@ -2,6 +2,16 @@ const queryInput = document.getElementById("query-input");
 const searchBtn = document.getElementById("search-btn");
 const resultsDiv = document.getElementById("results");
 const statusDiv = document.getElementById("status");
+const statusText = document.getElementById("status-text");
+const newSearchBtn = document.getElementById("new-search-btn");
+
+newSearchBtn.addEventListener("click", function () {
+    resultsDiv.textContent = "";
+    statusText.textContent = "";
+    newSearchBtn.style.display = "none";
+    queryInput.value = "";
+    queryInput.focus();
+});
 
 let lastSearchQuery = "";
 let searchSequence = 0;
@@ -55,48 +65,10 @@ function closeLightbox() {
 lightbox.querySelector(".lb-close").addEventListener("click", closeLightbox);
 lightbox.querySelector(".lb-backdrop").addEventListener("click", closeLightbox);
 document.addEventListener("keydown", function (e) {
-    if (e.key === "Escape") {
-        closeLightbox();
-        closeFeedbackModal();
-    }
+    if (e.key === "Escape") closeLightbox();
 });
 
 // ── Search feedback ─────────────────────────────────────
-const feedbackModal = document.createElement("div");
-feedbackModal.id = "feedback-modal";
-feedbackModal.setAttribute("aria-hidden", "true");
-feedbackModal.innerHTML = `
-  <div class="feedback-backdrop"></div>
-  <div class="feedback-content" role="dialog" aria-modal="true" aria-labelledby="feedback-title">
-    <button class="feedback-close" aria-label="Close feedback">✕</button>
-    <div class="feedback-kicker">Quick rating</div>
-    <div id="feedback-title" class="feedback-title">Are you satisfied with these results?</div>
-    <div class="feedback-scale" aria-label="Rate results from 1 to 5 stars">
-      <button type="button" class="star-btn" data-rating="1" aria-label="1 star, not satisfied">★</button>
-      <button type="button" class="star-btn" data-rating="2" aria-label="2 stars">★</button>
-      <button type="button" class="star-btn" data-rating="3" aria-label="3 stars">★</button>
-      <button type="button" class="star-btn" data-rating="4" aria-label="4 stars">★</button>
-      <button type="button" class="star-btn" data-rating="5" aria-label="5 stars, very satisfied">★</button>
-    </div>
-    <div class="feedback-labels">
-      <span>Not satisfied</span>
-      <span>Very satisfied</span>
-    </div>
-    <div class="feedback-thanks" aria-live="polite"></div>
-  </div>
-`;
-document.body.appendChild(feedbackModal);
-
-const feedbackStars = feedbackModal.querySelectorAll(".star-btn");
-const feedbackThanks = feedbackModal.querySelector(".feedback-thanks");
-
-function setFeedbackRating(rating) {
-    feedbackStars.forEach(function (star) {
-        const starRating = Number(star.dataset.rating);
-        star.classList.toggle("selected", starRating <= rating);
-    });
-}
-
 function saveFeedback(rating) {
     const feedback = {
         query: lastSearchQuery,
@@ -113,40 +85,83 @@ function saveFeedback(rating) {
     localStorage.setItem("cinematch_feedback", JSON.stringify(savedFeedback.slice(-25)));
 }
 
-function openFeedbackModal() {
-    feedbackThanks.textContent = "";
-    setFeedbackRating(0);
-    feedbackModal.classList.add("open");
-    feedbackModal.setAttribute("aria-hidden", "false");
+function createFeedbackBar() {
+    const bar = document.createElement("div");
+    bar.className = "feedback-bar";
+    bar.setAttribute("aria-label", "Rate these results");
+
+    const kicker = document.createElement("div");
+    kicker.className = "feedback-kicker";
+    kicker.textContent = "Quick rating";
+    bar.appendChild(kicker);
+
+    const titleEl = document.createElement("div");
+    titleEl.className = "feedback-bar-title";
+    titleEl.textContent = "Are you satisfied with these results?";
+    bar.appendChild(titleEl);
+
+    const scale = document.createElement("div");
+    scale.className = "feedback-scale";
+    scale.setAttribute("aria-label", "Rate results from 1 to 5 stars");
+
+    const starMeta = [
+        { rating: 1, label: "1 star, not satisfied" },
+        { rating: 2, label: "2 stars" },
+        { rating: 3, label: "3 stars" },
+        { rating: 4, label: "4 stars" },
+        { rating: 5, label: "5 stars, very satisfied" },
+    ];
+    const starBtns = starMeta.map(function (meta) {
+        const btn = document.createElement("button");
+        btn.type = "button";
+        btn.className = "star-btn";
+        btn.dataset.rating = String(meta.rating);
+        btn.setAttribute("aria-label", meta.label);
+        btn.textContent = "★";
+        scale.appendChild(btn);
+        return btn;
+    });
+    bar.appendChild(scale);
+
+    const labelsEl = document.createElement("div");
+    labelsEl.className = "feedback-labels";
+    const labelLeft = document.createElement("span");
+    labelLeft.textContent = "Not satisfied";
+    const labelRight = document.createElement("span");
+    labelRight.textContent = "Very satisfied";
+    labelsEl.appendChild(labelLeft);
+    labelsEl.appendChild(labelRight);
+    bar.appendChild(labelsEl);
+
+    const thanks = document.createElement("div");
+    thanks.className = "feedback-thanks";
+    thanks.setAttribute("aria-live", "polite");
+    bar.appendChild(thanks);
+
+    function setRating(rating) {
+        starBtns.forEach(function (s) {
+            s.classList.toggle("selected", Number(s.dataset.rating) <= rating);
+        });
+    }
+
+    starBtns.forEach(function (star) {
+        star.addEventListener("mouseenter", function () { setRating(Number(star.dataset.rating)); });
+        star.addEventListener("focus", function () { setRating(Number(star.dataset.rating)); });
+        star.addEventListener("click", function () {
+            const rating = Number(star.dataset.rating);
+            setRating(rating);
+            saveFeedback(rating);
+            thanks.textContent = "Thanks. Your rating helps tune the scene matching experience.";
+            starBtns.forEach(function (s) { s.disabled = true; });
+        });
+    });
+
+    scale.addEventListener("mouseleave", function () {
+        if (!thanks.textContent) setRating(0);
+    });
+
+    return bar;
 }
-
-function closeFeedbackModal() {
-    feedbackModal.classList.remove("open");
-    feedbackModal.setAttribute("aria-hidden", "true");
-}
-
-feedbackModal.querySelector(".feedback-close").addEventListener("click", closeFeedbackModal);
-feedbackModal.querySelector(".feedback-backdrop").addEventListener("click", closeFeedbackModal);
-
-feedbackStars.forEach(function (star) {
-    star.addEventListener("mouseenter", function () {
-        setFeedbackRating(Number(star.dataset.rating));
-    });
-    star.addEventListener("focus", function () {
-        setFeedbackRating(Number(star.dataset.rating));
-    });
-    star.addEventListener("click", function () {
-        const rating = Number(star.dataset.rating);
-        setFeedbackRating(rating);
-        saveFeedback(rating);
-        feedbackThanks.textContent = "Thanks. Your rating helps tune the scene matching experience.";
-        window.setTimeout(closeFeedbackModal, 900);
-    });
-});
-
-feedbackModal.querySelector(".feedback-scale").addEventListener("mouseleave", function () {
-    if (!feedbackThanks.textContent) setFeedbackRating(0);
-});
 
 // ── Card ─────────────────────────────────────────────────
 function getFilmInfo(scene) {
@@ -232,8 +247,8 @@ async function search() {
     searchSequence = currentSearch;
 
     searchBtn.disabled = true;
-    closeFeedbackModal();
-    statusDiv.textContent = "Searching...";
+    newSearchBtn.style.display = "none";
+    statusText.textContent = "Searching...";
     resultsDiv.textContent = "";
 
     try {
@@ -246,21 +261,20 @@ async function search() {
             noResults.className = "no-results";
             noResults.textContent = "No matching scenes found. Try a different description.";
             resultsDiv.appendChild(noResults);
-            statusDiv.textContent = "";
+            statusText.textContent = "";
             return;
         }
 
-        statusDiv.textContent = "Top " + data.results.length + " matches for \"" + data.query + "\"";
+        statusText.textContent = "Top " + data.results.length + " matches for \"" + data.query + "\"";
+        newSearchBtn.style.display = "inline-flex";
         lastSearchQuery = data.query;
 
         data.results.forEach(function (scene) {
             resultsDiv.appendChild(createSceneCard(scene));
         });
-        window.setTimeout(function () {
-            if (searchSequence === currentSearch) openFeedbackModal();
-        }, 450);
+        resultsDiv.appendChild(createFeedbackBar());
     } catch (err) {
-        statusDiv.textContent = "Error: " + err.message;
+        statusText.textContent = "Error: " + err.message;
     } finally {
         searchBtn.disabled = false;
     }
