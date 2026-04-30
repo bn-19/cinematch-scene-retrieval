@@ -4,6 +4,7 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>CineMatch — Scene Retrieval</title>
+    <link rel="icon" href='data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="%230f0f0f"/><circle cx="16" cy="16" r="7" fill="%23c8a97e"/></svg>'>
     <link rel="preconnect" href="https://fonts.googleapis.com">
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
     <link href="https://fonts.googleapis.com/css2?family=DM+Serif+Display&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -11,6 +12,10 @@
 </head>
 <body>
     <div class="container">
+        <div class="utility-bar">
+            <button id="present-toggle" class="ghost-btn" type="button" aria-pressed="false">Present</button>
+        </div>
+
         <header>
             <h1>CineMatch</h1>
             <p class="subtitle">Describe a scene. Find your reference.</p>
@@ -26,13 +31,62 @@
                 >
                 <button id="search-btn">Search</button>
             </div>
+
+            <div class="demo-queries" aria-label="Demo searches">
+                <button type="button" data-query="dark shadow">dark shadow</button>
+                <button type="button" data-query="bright outdoor scene">bright outdoor scene</button>
+                <button type="button" data-query="lonely character">lonely character</button>
+                <button type="button" data-query="crowded room">crowded room</button>
+                <button type="button" data-query="dramatic lighting">dramatic lighting</button>
+            </div>
+
+            <p class="cold-start-note">
+                First search after the hosted Space wakes up can take 30-60 seconds while the model loads.
+            </p>
         </div>
 
         <div id="status" class="status">
             <span id="status-text"></span>
-            <button id="new-search-btn">New Search</button>
+            <button id="new-search-btn" type="button">New Search</button>
         </div>
         <div id="results" class="results-grid"></div>
+
+        <section class="presentation-support" aria-label="Presentation support">
+            <div class="support-panel">
+                <h2>How it works</h2>
+                <ol class="pipeline">
+                    <li>
+                        <span class="step-num">1</span>
+                        <div>
+                            <strong>Text query</strong>
+                            <p>A scene description captures mood, composition, action, or lighting.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-num">2</span>
+                        <div>
+                            <strong>CLIP embedding</strong>
+                            <p>OpenCLIP maps the query into the same vector space as the film stills.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-num">3</span>
+                        <div>
+                            <strong>Vector search</strong>
+                            <p>ChromaDB compares cosine distance against the indexed scene collection.</p>
+                        </div>
+                    </li>
+                    <li>
+                        <span class="step-num">4</span>
+                        <div>
+                            <strong>Scene matches</strong>
+                            <p>The app returns the closest frames with metadata and similarity scores.</p>
+                        </div>
+                    </li>
+                </ol>
+            </div>
+
+        </section>
     </div>
 
     <script src="/static/app.js"></script>
