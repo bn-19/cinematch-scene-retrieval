@@ -72,6 +72,31 @@ Open [http://localhost:8000](http://localhost:8000) in your browser.
 
 Last deploy workflow smoke test: 2026-04-20.
 
+## Class Presentation Demo
+
+The frontend includes a presentation-ready demo surface:
+
+- Preset queries: `dark shadow`, `bright outdoor scene`, `lonely character`, `crowded room`, and `dramatic lighting`
+- Presenter mode: click **Present** or open [http://localhost:8000/?present=1](http://localhost:8000/?present=1)
+- Cold-start note: the UI sets expectations when the hosted Space is waking up
+- Result metadata: each match shows title, director, timestamp, frame ID, tone tags, and similarity score
+- In-app explanation: the lower panel summarizes the CLIP-to-ChromaDB retrieval pipeline
+
+Suggested live flow:
+
+1. Open presenter mode.
+2. Click `dark shadow` to show semantic matching from a short query.
+3. Open one result and explain the metadata, tone tags, and similarity score.
+4. Type a more specific prompt, such as `a lonely figure framed by harsh light`, to show natural-language retrieval.
+
+Fallback screenshots for class Wi-Fi or Space startup delays:
+
+![CineMatch demo results](docs/screenshots/demo-results.png)
+
+![CineMatch presentation mode](docs/screenshots/presentation-mode.png)
+
+![CineMatch mobile presentation mode](docs/screenshots/mobile-presentation-mode.png)
+
 ## Free Hosted Demo
 
 For a free public link, deploy this project as a Docker Space on Hugging Face Spaces.
@@ -126,3 +151,12 @@ Performance of CineMatch would be evaluated through **user judgment studies**:
 3. **Precision@K**: Measure what fraction of the top-K results a panel of filmmakers considers genuinely relevant to the query.
 
 Because scene-to-description matching is inherently subjective (different filmmakers may interpret "a quiet dinner where something is being left unsaid" differently), quantitative metrics like precision and recall must be complemented by qualitative assessment of whether the retrieved scenes serve as useful creative references.
+
+### Presentation Snapshot
+
+- Indexed scenes: **172**
+- Encoder: **OpenCLIP ViT-B/32**
+- Vector store: **ChromaDB**
+- Similarity metric: **cosine similarity**
+- Returned results: **top 5 scene matches**
+- Demo queries: `dark shadow`, `bright outdoor scene`, `lonely character`, `crowded room`, `dramatic lighting`
