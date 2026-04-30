@@ -3,7 +3,6 @@ const searchBtn = document.getElementById("search-btn");
 const resultsDiv = document.getElementById("results");
 const statusText = document.getElementById("status-text");
 const newSearchBtn = document.getElementById("new-search-btn");
-const presentToggle = document.getElementById("present-toggle");
 
 let lastSearchQuery = "";
 let searchSequence = 0;
@@ -199,35 +198,6 @@ function getFrameLabel(scene, includeFile) {
     return parts.join("  ·  ");
 }
 
-function isPresentationMode() {
-    return document.body.classList.contains("presentation-mode");
-}
-
-function setPresentationMode(enabled, persist) {
-    document.body.classList.toggle("presentation-mode", enabled);
-    presentToggle.setAttribute("aria-pressed", enabled ? "true" : "false");
-    presentToggle.textContent = enabled ? "Exit Present" : "Present";
-    if (persist) {
-        localStorage.setItem("cinematch_presentation_mode", enabled ? "1" : "0");
-        const url = new URL(window.location.href);
-        if (enabled) {
-            url.searchParams.set("present", "1");
-        } else {
-            url.searchParams.delete("present");
-        }
-        window.history.replaceState({}, "", url);
-    }
-}
-
-function loadPresentationPreference() {
-    const params = new URLSearchParams(window.location.search);
-    if (params.get("present") === "1") {
-        setPresentationMode(true, false);
-        return;
-    }
-    setPresentationMode(localStorage.getItem("cinematch_presentation_mode") === "1", false);
-}
-
 function createSceneCard(scene) {
     const card = document.createElement("div");
     card.className = "scene-card";
@@ -356,9 +326,3 @@ document.querySelectorAll("[data-query]").forEach(function (button) {
         search();
     });
 });
-
-presentToggle.addEventListener("click", function () {
-    setPresentationMode(!isPresentationMode(), true);
-});
-
-loadPresentationPreference();

@@ -77,7 +77,6 @@ Last deploy workflow smoke test: 2026-04-20.
 The frontend includes a polished demo surface:
 
 - Preset queries: `dark shadow`, `bright outdoor scene`, `lonely character`, `crowded room`, and `dramatic lighting`
-- Presenter mode: click **Present** or open [http://localhost:8000/?present=1](http://localhost:8000/?present=1)
 - Cold-start note: the UI sets expectations when the hosted Space is waking up
 - Result metadata: each match shows title, director, timestamp, frame ID, tone tags, and similarity score
 - In-app explanation: the lower panel summarizes the CLIP-to-ChromaDB retrieval pipeline
@@ -85,10 +84,6 @@ The frontend includes a polished demo surface:
 Fallback screenshots:
 
 ![CineMatch demo results](docs/screenshots/demo-results.png)
-
-![CineMatch presentation mode](docs/screenshots/presentation-mode.png)
-
-![CineMatch mobile presentation mode](docs/screenshots/mobile-presentation-mode.png)
 
 ## Free Hosted Demo
 
